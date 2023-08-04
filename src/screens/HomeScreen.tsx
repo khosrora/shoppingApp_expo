@@ -1,12 +1,17 @@
-import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import { Button, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTheme } from '@react-navigation/native'
 import Icons from '@expo/vector-icons/MaterialIcons'
+import {
+  BottomSheetModal,
+} from '@gorhom/bottom-sheet';
 
 import { BlurView } from 'expo-blur';
 
 import MasonryList from '@react-native-seoul/masonry-list';
+import CustomBackdrop from '../components/CustomBackdrop'
+import FilterView from '../components/FilterView'
 
 const data: any = [
   {
@@ -61,6 +66,18 @@ const avatar = 'https://techtrickseo.com/wp-content/uploads/2019/10/dvjbjdfnv.jp
 
 const HomeScreen = () => {
 
+  // ref
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  // variables
+  const snapPoints = useMemo(() => ['25%', '50%', '75%'], []);
+
+  // callbacks
+  const openFilterModal = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
+
   const { colors } = useTheme();
 
   const [categoryIndex, setCategoryIndex] = useState(0)
@@ -95,7 +112,7 @@ const HomeScreen = () => {
             <Icons name='search' size={24} color={colors.text} style={{ opacity: 0.5 }} />
             <Text style={{ flex: 1, fontSize: 16, color: colors.text, opacity: 0.5 }}> Search </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{ width: 52, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 52, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.primary }}>
+          <TouchableOpacity onPress={openFilterModal} style={{ width: 52, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 52, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.primary }}>
             <Icons name='tune' size={24} color={colors.background} />
           </TouchableOpacity>
         </View>
@@ -162,7 +179,7 @@ const HomeScreen = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 24 }}
           renderItem={({ item, i }) => (
-            <View style={{ padding: 4}}>
+            <View style={{ padding: 4 }}>
               <View style={{ aspectRatio: i === 0 ? 1 : 2 / 3, position: 'relative', overflow: 'hidden', borderRadius: 24, padding: 12 }} >
                 <Image
                   source={{ uri: item.imgURL }}
@@ -192,6 +209,15 @@ const HomeScreen = () => {
           onEndReachedThreshold={0.1}
         />
       </SafeAreaView>
+
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={1}
+        snapPoints={snapPoints}
+        backdropComponent={(props) => <CustomBackdrop {...props} />}
+      >
+        <FilterView />
+      </BottomSheetModal>
     </ScrollView >
   )
 }
